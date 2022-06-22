@@ -34,12 +34,6 @@ func TestAddition(t *testing.T) {
 	assertEqual(t, fifteenDollars, portfolioInDollars)
 }
 
-func assertEqual(t *testing.T, expected s.Money, actual s.Money) {
-	if expected != actual {
-		t.Errorf("Expected %+v Got %+v", expected, actual)
-	}
-}
-
 func TestAdditionOfDollarsAndEuros(t *testing.T) {
 	var portfolio s.Portfolio
 
@@ -68,4 +62,28 @@ func TestAdditionOfDollarsAndWons(t *testing.T) {
 	actualValue := portfolio.Evaluate("KRW")
 
 	assertEqual(t, expectedValue, actualValue)
+}
+
+func TestAdditionWithMultipleMissingExchangeRates(t *testing.T) {
+	var portfolio s.Portfolio
+
+	oneDollar := s.NewMoney(1, "USD")
+	oneEuro := s.NewMoney(1, "EUR")
+	oneWon := s.NewMoney(1, "KRW")
+
+	portfolio = portfolio.Add(oneDollar)
+	portfolio = portfolio.Add(oneEuro)
+	portfolio = portfolio.Add(oneWon)
+
+	expectedErrorMessage :=
+		"Missing exchange rate(s):[USD->Kalganid,EUR->Kalganid,KRW->Kalganid,]"
+	_, actualError := portfolio.Evaluate("Kalganid")
+
+	assertEqual(t, expectedErrorMessage, actualError.Error())
+}
+
+func assertEqual(t *testing.T, expected interface{}, actual interface{}) {
+	if expected != actual {
+		t.Errorf("Expected %+v Got %+v", expected, actual)
+	}
 }
